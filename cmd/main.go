@@ -21,17 +21,17 @@ func main() {
 		log.Fatal("Erro ao carregar o arquivo .env")
 	}
 
-	cfg := connect_db.Config{
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-		Database: os.Getenv("DB_DATABASE"),
-	}
+	connectionProvider := connect_db.NewConnectionProviderFromEnv(
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_DATABASE"),
+	)
 
-	db, err := connect_db.NewConnectionDB(cfg)
+	db, err := connectionProvider.NewConnectionDB()
 	if err != nil {
-		fmt.Println("Erro ao conectar ao MySQL:", err)
+		fmt.Println("Erro ao conectar ao database:", err)
 		return
 	}
 
@@ -44,9 +44,7 @@ func main() {
 
 }
 
-func initDependencies(
-	database *gorm.DB,
-) controller.ControllerInterface {
+func initDependencies(database *gorm.DB) controller.ControllerInterface {
 	repo := repository.NewDatabase(database)
 	service := service.NewDomainService(repo)
 	return controller.NewControllerInterface(service)
