@@ -8,4 +8,5 @@ import (
 func InitRoutes(r *gin.RouterGroup, controller controller.ControllerInterface) {
 	r.GET("/getAllUsers", controller.ReadlAllUsers)
 	r.POST("/createUser", controller.CreateUser)
+	r.POST("/loginUser", controller.LoginUser)
 }

@@ -9,6 +9,7 @@ import (
 
 type DomainService interface {
 	CreateUser(request models.CreateUser) string
+	LoginUser(request models.LoginUser) string
 	ReadAllUsers(c *gin.Context) ([]models.GetUsers, error)
 }
 
@@ -22,8 +23,9 @@ func NewDomainService(
 	return &useDomainService{db}
 }
 
-func (uds *useDomainService) ReadAllUsers(c *gin.Context) ([]models.GetUsers, error) {
-	return uds.userRepository.ReadAllUsers()
+// passar o database mock com datadogs na injeção de dependência para essa função em qstão.
+func (service *useDomainService) ReadAllUsers(c *gin.Context) ([]models.GetUsers, error) {
+	return service.userRepository.ReadAllUsers()
 }
 
 func (service *useDomainService) CreateUser(request models.CreateUser) string {
@@ -49,4 +51,31 @@ func (service *useDomainService) CreateUser(request models.CreateUser) string {
 	}
 
 	return "E-mail já existe e está associado a outra conta"
+}
+
+func (service *useDomainService) LoginUser(request models.LoginUser) string {
+
+	emailExists, err := service.userRepository.VerificExist(request.Email)
+	if err != nil {
+		return "Erro ao verificar a existência do e-mail"
+	}
+
+	if emailExists {
+		hash, err := service.userRepository.GetPasswordByEmail(request.Email)
+		if err != nil {
+			return "Erro ao verificar o campo senha no banco de dados"
+		}
+
+		compare, err := crypto.CheckPassword(request.Password, hash)
+		if err != nil {
+			return "Senha incorreta"
+		}
+
+		if compare {
+			return "Login efetuado com sucesso"
+		}
+
+	}
+
+	return "O usuário não existe em nosso cadastro"
 }

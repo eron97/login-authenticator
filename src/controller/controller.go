@@ -12,6 +12,7 @@ import (
 type ControllerInterface interface {
 	ReadlAllUsers(c *gin.Context)
 	CreateUser(c *gin.Context)
+	LoginUser(c *gin.Context)
 }
 
 type useControllerInterface struct {
@@ -31,7 +32,6 @@ func (controller *useControllerInterface) CreateUser(c *gin.Context) {
 
 	err := request_validate.ValidateRequest(c, &request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Erro de validação"})
 		return
 	}
 
@@ -39,12 +39,25 @@ func (controller *useControllerInterface) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": resp})
 }
 
-func (pkg *useControllerInterface) ReadlAllUsers(c *gin.Context) {
+func (controller *useControllerInterface) ReadlAllUsers(c *gin.Context) {
 
-	resp, err := pkg.service.ReadAllUsers(c)
+	resp, err := controller.service.ReadAllUsers(c)
 	if err != nil {
 		return
 	}
 
 	c.JSON(http.StatusOK, resp)
+}
+
+func (controller *useControllerInterface) LoginUser(c *gin.Context) {
+	var request models.LoginUser
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Não foi possível ler os dados de requisição"})
+		return
+	}
+
+	resp := controller.service.LoginUser(request)
+	c.JSON(http.StatusOK, gin.H{"message": resp})
+
 }

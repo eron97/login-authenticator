@@ -4,7 +4,6 @@ go 1.21.1
 
 require (
 	github.com/gin-gonic/gin v1.9.1
-	go.uber.org/mock v0.4.0
 	gorm.io/gorm v1.25.2-0.20230530020048-26663ab9bf55
 )
 
